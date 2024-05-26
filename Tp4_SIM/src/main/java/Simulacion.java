@@ -1,6 +1,7 @@
 import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Data
@@ -33,12 +34,22 @@ public class Simulacion {
                       Optional<Double> probabilidadLectura,
                       Optional<Double> tiempoPromedioLectura) {
         this.frecuenciaLlegada = frecuenciaLlegada.orElse(4.0);
+        Cola.setMediaLlegada(frecuenciaLlegada.orElse(4.0));
+
         this.iteracionesAMostrar = iteracionesAMostrar.orElse(getDefaultIteracionesAMostrar());
         this.tiempoSimulacion = tiempoSimulacion.orElse(100.0);
+
         this.probabilidadesCasos = probabilidadesCasos.orElse(getDefaultProbabilidadesCasos());
+        Bibliotecario.setProbabilidadesCasos(probabilidadesCasos.orElse(getDefaultProbabilidadesCasos()));
+
         this.tiemposAtencionConsulta = tiemposAtencionConsulta.orElse(getDefaultTiemposAtencionConsulta());
+        Bibliotecario.setTiemposAtencionConsulta(tiemposAtencionConsulta.orElse(getDefaultTiemposAtencionConsulta()));
+
         this.probabilidadLectura = probabilidadLectura.orElse(0.4);
+        Cliente.setProbabilidadPermanecerLeyendo(probabilidadLectura.orElse(0.4));
+
         this.tiempoPromedioLectura = tiempoPromedioLectura.orElse(30.0);
+        Cliente.setTiempoPromedioLectura(tiempoPromedioLectura.orElse(30.0));
         inicializarVariables();
     }
 
@@ -87,16 +98,12 @@ public class Simulacion {
             switch (evento) {
                 case "llegadaCliente":
                     llegadaCliente();
-                    break;
                 case "finAtencionS1":
                     finAtencionS1();
-                    break;
                 case "finAtencionS2":
                     finAtencionS2();
-                    break;
                 case "finLectura":
                     finLectura();
-                    break;
             }
             imprimirResultados();
             calcularProximoEvento();
@@ -111,13 +118,61 @@ public class Simulacion {
 
     // Calcular próximo evento
     public void calcularProximoEvento() {
+        double minimo = cola.getProximaLlegada();
+        evento = "llegadaCliente";
+        if (bibliotecarios.get(0).getTiempoFinAtencion() < minimo) {
+            minimo = bibliotecarios.get(0).getTiempoFinAtencion();
+            evento = "finAtencionS1";
+        }
+        if (bibliotecarios.get(1).getTiempoFinAtencion() < minimo) {
+            minimo = bibliotecarios.get(1).getTiempoFinAtencion();
+            evento = "finAtencionS2";
+        }
+        //para cada cliente que este en estado leyendo se fija si es el proximo en terminar
+        for (Cliente cliente : capacidadTotal) {
+            if (cliente.getTiempoSalida() < minimo && Objects.equals(cliente.getEstado(), "leyendo")) {
+                minimo = cliente.getTiempoSalida();
+                evento = "finLectura";
+            }
+        }
+
+        reloj = minimo;
+
     }
 
     // Eventos
     public void llegadaCliente() {
+        if (capacidadTotal.size() < 20) {
+
+            Cliente cliente = new Cliente(reloj);
+            cliente.setTiempoEntrada(reloj);
+            capacidadTotal.add(cliente);
+            llegadasTotales++;
+            // Si hay bibliotecarios libres se atiende al cliente en ese bibliotecario, sino lo pone en la cola
+            if (bibliotecarios.get(0).getEstado().equals("Libre")) {
+                bibliotecarios.get(0).setEstado("Ocupado");
+                bibliotecarios.get(0).setCliente(cliente);
+                bibliotecarios.get(0).calcularTiempoFinAtencion(reloj);
+                cliente.setEstado("Atendido");
+            } else if (bibliotecarios.get(1).getEstado().equals("Libre")) {
+                bibliotecarios.get(1).setEstado("Ocupado");
+                bibliotecarios.get(1).setCliente(cliente);
+                bibliotecarios.get(1).calcularTiempoFinAtencion(reloj);
+                cliente.setEstado("Atendido");
+            } else {
+                cola.getColaAtencion().add(cliente);
+                cliente.setEstado("Esperando");
+            }
+            cola.calcularProximaLlegada(reloj);
+        } else {
+            llegadasFallidas++;
+            llegadasTotales++;
+            cola.calcularProximaLlegada(reloj);
+        }
     }
 
     public void finAtencionS1() {
+
     }
 
     public void finAtencionS2() {
