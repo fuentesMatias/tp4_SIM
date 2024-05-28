@@ -1,8 +1,6 @@
 import lombok.Data;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+
+import java.util.*;
 
 @Data
 public class Simulacion {
@@ -24,6 +22,7 @@ public class Simulacion {
     private double reloj;
     private int llegadasTotales;
     private int llegadasFallidas;
+    private List<Double> tiemposDePermanencia;
 
     // Constructor con valores por defecto
     public Simulacion(Optional<Double> frecuenciaLlegada,
@@ -66,6 +65,7 @@ public class Simulacion {
         reloj = 0;
         llegadasTotales = 0;
         llegadasFallidas = 0;
+        tiemposDePermanencia = new ArrayList<>();
     }
 
     private static List<Double> getDefaultProbabilidadesCasos() {
@@ -90,47 +90,55 @@ public class Simulacion {
         return defaultIteraciones;
     }
     // Inicializar
-    public void inicializar() {
+    public void simular() {
         cola.setProximaLlegada(1.6);
         imprimirResultados();
+        calcularProximoEvento();
         nroIteracion++;
         while (reloj < tiempoSimulacion && nroIteracion < 100000) {
             switch (evento) {
                 case "llegadaCliente":
                     llegadaCliente();
+                    break;
                 case "finAtencionS1":
                     finAtencionS1();
+                    break;
                 case "finAtencionS2":
                     finAtencionS2();
+                    break;
                 case "finLectura":
                     finLectura();
+                    break;
             }
             imprimirResultados();
             calcularProximoEvento();
             nroIteracion++;
         }
-        System.out.println(nroIteracion);
 
     }
 
     private void imprimirResultados() {
-    }
+            // Ensure locale is set to US to use dot as decimal separator
+        Locale.setDefault(Locale.US);
+
+        System.out.println(capacidadTotal.size());
+        }
 
     // Calcular próximo evento
     public void calcularProximoEvento() {
         double minimo = cola.getProximaLlegada();
         evento = "llegadaCliente";
-        if (bibliotecarios.get(0).getTiempoFinAtencion() < minimo) {
+        if (bibliotecarios.get(0).getTiempoFinAtencion() < minimo && bibliotecarios.get(0).getTiempoFinAtencion() != -1){
             minimo = bibliotecarios.get(0).getTiempoFinAtencion();
             evento = "finAtencionS1";
         }
-        if (bibliotecarios.get(1).getTiempoFinAtencion() < minimo) {
+        if (bibliotecarios.get(1).getTiempoFinAtencion() < minimo && bibliotecarios.get(1).getTiempoFinAtencion() != -1){
             minimo = bibliotecarios.get(1).getTiempoFinAtencion();
             evento = "finAtencionS2";
         }
         //para cada cliente que este en estado leyendo se fija si es el proximo en terminar
         for (Cliente cliente : capacidadTotal) {
-            if (cliente.getTiempoSalida() < minimo && Objects.equals(cliente.getEstado(), "leyendo")) {
+            if (cliente.getTiempoSalida() < minimo && Objects.equals(cliente.getEstado(), "leyendo") && cliente.getTiempoSalida() != -1) {
                 minimo = cliente.getTiempoSalida();
                 evento = "finLectura";
             }
@@ -143,21 +151,18 @@ public class Simulacion {
     // Eventos
     public void llegadaCliente() {
         if (capacidadTotal.size() < 20) {
-
+            //si la capacidad es menor a 20 se agrega un cliente
             Cliente cliente = new Cliente(reloj);
-            cliente.setTiempoEntrada(reloj);
+            //se agrega el cliente a la biblioteca, dsp se decide a donde va
             capacidadTotal.add(cliente);
             llegadasTotales++;
+
             // Si hay bibliotecarios libres se atiende al cliente en ese bibliotecario, sino lo pone en la cola
             if (bibliotecarios.get(0).getEstado().equals("Libre")) {
-                bibliotecarios.get(0).setEstado("Ocupado");
-                bibliotecarios.get(0).setCliente(cliente);
-                bibliotecarios.get(0).calcularTiempoFinAtencion(reloj);
+                bibliotecarios.get(0).ocuparBibliotecario(cliente, reloj); // setea y calcula el tiempo de fin de atencion
                 cliente.setEstado("Atendido");
             } else if (bibliotecarios.get(1).getEstado().equals("Libre")) {
-                bibliotecarios.get(1).setEstado("Ocupado");
-                bibliotecarios.get(1).setCliente(cliente);
-                bibliotecarios.get(1).calcularTiempoFinAtencion(reloj);
+                bibliotecarios.get(1).ocuparBibliotecario(cliente, reloj); // setea y calcula el tiempo de fin de atencion
                 cliente.setEstado("Atendido");
             } else {
                 cola.getColaAtencion().add(cliente);
@@ -172,12 +177,87 @@ public class Simulacion {
     }
 
     public void finAtencionS1() {
+        Cliente cliente = bibliotecarios.get(0).getCliente();
+        //cuando termina de antender a un cliente, primero se verifica si ese cliente pidio un libro
+        if(Objects.equals(bibliotecarios.get(0).getTipoConsulta(), "Pedir")){
+            //si pidio un libro, se calcula si se queda o se va
+            if (cliente.calcularTiempoSalidaSiPidio(reloj)){ // En este metodo se setea el tiempo ya sea si se va o se queda
+                //si se queda, se cambia el estado a leyendo, y se libera al bibliotecario
+                cliente.setEstado("leyendo");
+                bibliotecarios.get(0).liberarBibliotecario();
+            }
+            else{
+                //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
+                tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
+                capacidadTotal.remove(cliente);
+                bibliotecarios.get(0).liberarBibliotecario();
+            }
+        }
+        else{
+            //si no pidio un libro, se libera al bibliotecario, y se saca al cliente de la biblioteca y se guarda el tiempo de permanencia
+            cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
+            tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+            capacidadTotal.remove(cliente);//Saco al cliente de la biblioteca
+            bibliotecarios.get(0).liberarBibliotecario();
+        }
+
+        //Ahora si hay gente en la cola, se atiende al proximo
+        if (!cola.getColaAtencion().isEmpty()) { //Si hay gente en la cola
+            Cliente next = cola.getColaAtencion().get(0);
+            cola.getColaAtencion().remove(0);
+            bibliotecarios.get(0).ocuparBibliotecario(next, reloj);
+            next.setEstado("Atendido");
+        }
 
     }
 
     public void finAtencionS2() {
+        Cliente cliente = bibliotecarios.get(1).getCliente();
+        //cuando termina de antender a un cliente, primero se verifica si ese cliente pidio un libro
+        if(Objects.equals(bibliotecarios.get(1).getTipoConsulta(), "Pedir")){
+            //si pidio un libro, se calcula si se queda o se va
+            if (cliente.calcularTiempoSalidaSiPidio(reloj)){ // En este metodo se setea el tiempo ya sea si se va o se queda
+                //si se queda, se cambia el estado a leyendo, y se libera al bibliotecario
+                cliente.setEstado("leyendo");
+                bibliotecarios.get(1).liberarBibliotecario();
+            }
+            else{
+                //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
+                tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
+                capacidadTotal.remove(cliente);
+                bibliotecarios.get(1).liberarBibliotecario();
+            }
+        }
+        else{
+            //si no pidio un libro, se libera al bibliotecario, y se saca al cliente de la biblioteca y se guarda el tiempo de permanencia
+            cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
+            tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+            capacidadTotal.remove(cliente);//Saco al cliente de la biblioteca
+            bibliotecarios.get(1).liberarBibliotecario();
+        }
+
+        //Ahora si hay gente en la cola, se atiende al proximo
+        if (!cola.getColaAtencion().isEmpty()) { //Si hay gente en la cola
+            Cliente next = cola.getColaAtencion().get(0);
+            cola.getColaAtencion().remove(0);
+            bibliotecarios.get(1).ocuparBibliotecario(next, reloj);
+            next.setEstado("Atendido");
+        }
     }
 
     public void finLectura() {
+        //Busca al cliente que termino de leer por el tiempo del reloj actual
+        Cliente cliente = null;
+        for (Cliente c : capacidadTotal) {
+            if (c.getTiempoSalida() == reloj && Objects.equals(c.getEstado(), "leyendo")) {
+                cliente = c;
+                break;
+            }
+        }
+        // Si termino de leer lo guarda el tiempo de permanencia y lo saca de la biblioteca
+        if (cliente != null) {
+            tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
+            capacidadTotal.remove(cliente);
+        }
     }
 }

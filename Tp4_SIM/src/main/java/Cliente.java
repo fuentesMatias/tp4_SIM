@@ -14,7 +14,7 @@ public class Cliente {
         rndDesicion = 0;
         rndTiempoLectura = 0;
         tiempoEntrada = reloj;
-        tiempoSalida = 0;
+        tiempoSalida = -1;
     }
 
     public static void setProbabilidadPermanecerLeyendo(Double prob) {
@@ -25,14 +25,16 @@ public class Cliente {
     public static void setTiempoPromedioLectura(Double tiempo) {
         tiempoPromedioLectura = tiempo;
     }
-    public void calcularTiempoSalida(double reloj) {
+    public boolean calcularTiempoSalidaSiPidio(double reloj) {
         rndDesicion = Math.random();
         if (rndDesicion < probabilidadPermanecerLeyendo){ // decidir si permanece leyendo
             rndTiempoLectura = Math.random();
-            tiempoSalida = reloj - 30 * Math.log(1 - rndTiempoLectura);
+            tiempoSalida = reloj - tiempoPromedioLectura * Math.log(1 - rndTiempoLectura);
+            return true;
         }
         else {
             tiempoSalida = reloj;
+            return false;
         }
     }
 

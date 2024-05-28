@@ -4,12 +4,12 @@ public class Main {
     public static void main(String[] args) {
 
         Simulacion simulacion = new Simulacion(Optional.empty(),
-                Optional.of(100.0),
+                Optional.of(1000.0),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty());
-        simulacion.inicializar();
+        simulacion.simular();
     }
 }
