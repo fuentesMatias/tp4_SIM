@@ -121,7 +121,7 @@ public class Simulacion {
             // Ensure locale is set to US to use dot as decimal separator
         Locale.setDefault(Locale.US);
 
-        System.out.println(capacidadTotal.size());
+        System.out.println(nroIteracion);
         }
 
     // Calcular próximo evento

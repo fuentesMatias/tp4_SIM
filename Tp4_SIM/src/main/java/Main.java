@@ -11,5 +11,6 @@ public class Main {
                 Optional.empty(),
                 Optional.empty());
         simulacion.simular();
+        Simulador simulador = new Simulador();
     }
 }
