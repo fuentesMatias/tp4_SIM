@@ -6,7 +6,7 @@ import java.util.*;
 public class Simulacion {
     // Parametros
     private double tiempoSimulacion;
-    private List<Integer> iteracionesAMostrar;
+    private Integer iteracionesAMostrar;
     private double frecuenciaLlegada;
     private List<Double> probabilidadesCasos;
     private List<Double> tiemposAtencionConsulta;
@@ -14,6 +14,8 @@ public class Simulacion {
     private double tiempoPromedioLectura;
 
     // Variables
+    //matriz de resultados
+    private List<List<Object>> matriz = new ArrayList<>();
     private List<Cliente> capacidadTotal;
     private List<Bibliotecario> bibliotecarios;
     private Cola cola;
@@ -27,7 +29,7 @@ public class Simulacion {
     // Constructor con valores por defecto
     public Simulacion(Optional<Double> frecuenciaLlegada,
                       Optional<Double> tiempoSimulacion,
-                      Optional<List<Integer>> iteracionesAMostrar,
+                      Optional<Integer> iteracionesAMostrar,
                       Optional<List<Double>> probabilidadesCasos,
                       Optional<List<Double>> tiemposAtencionConsulta,
                       Optional<Double> probabilidadLectura,
@@ -35,7 +37,7 @@ public class Simulacion {
         this.frecuenciaLlegada = frecuenciaLlegada.orElse(4.0);
         Cola.setMediaLlegada(frecuenciaLlegada.orElse(4.0));
 
-        this.iteracionesAMostrar = iteracionesAMostrar.orElse(getDefaultIteracionesAMostrar());
+        this.iteracionesAMostrar = iteracionesAMostrar.orElse(100);
         this.tiempoSimulacion = tiempoSimulacion.orElse(100.0);
 
         this.probabilidadesCasos = probabilidadesCasos.orElse(getDefaultProbabilidadesCasos());
@@ -83,16 +85,12 @@ public class Simulacion {
         return defaultTiempos;
     }
 
-    private static List<Integer> getDefaultIteracionesAMostrar() {
-        List<Integer> defaultIteraciones = new ArrayList<>();
-        defaultIteraciones.add(1);
-        defaultIteraciones.add(100);
-        return defaultIteraciones;
-    }
+
     // Inicializar
-    public void simular() {
+    public List<List<Object>> simular() {
+
         cola.setProximaLlegada(1.6);
-        imprimirResultados();
+        matriz.add(imprimirResultados());
         calcularProximoEvento();
         nroIteracion++;
         while (reloj < tiempoSimulacion && nroIteracion < 100000) {
@@ -110,19 +108,66 @@ public class Simulacion {
                     finLectura();
                     break;
             }
-            imprimirResultados();
+            matriz.add(imprimirResultados());
             calcularProximoEvento();
             nroIteracion++;
         }
-
+        return matriz;
     }
 
-    private void imprimirResultados() {
-            // Ensure locale is set to US to use dot as decimal separator
-        Locale.setDefault(Locale.US);
+    private List<Object> imprimirResultados() {
+        //crea una lista de Objetos para guardar los resultados de longitud fija
 
-        System.out.println(nroIteracion);
+        List<Object> resultados = new ArrayList<>(121);
+        //agregar todos estos datos:
+        //"evento", "reloj", "Llegada_rnd1", "tiempo", "proxLlegada",
+        //                "Cola Atención", "Ocupacion Actual", "S1_estado", "S1_cliente",
+        //                "S1_rndCaso", "S1_caso", "S1_rndTiempo", "S1_duracionA",
+        //                "S1_finAtencion", "S2_estado", "S2_cliente", "S2_rndCaso",
+        //                "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion",
+
+        resultados.add(0, evento);
+        resultados.add(1, String.format("%.2f", reloj));
+        resultados.add(2, evento.equals("llegadaCliente") ? String.format("%.2f", cola.getRnd()) : "-");
+        resultados.add(3, evento.equals("llegadaCliente") ? String.format("%.2f", cola.getTiempoEntre()) : "-");
+        resultados.add(4, String.format("%.2f", cola.getProximaLlegada()));
+        resultados.add(5, cola.getColaAtencion().size());
+        resultados.add(6, capacidadTotal.size());
+
+        resultados.add(7, bibliotecarios.get(0).getEstado().equals("Libre") ? "Libre" : bibliotecarios.get(0).getEstado());
+        resultados.add(8, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.valueOf(bibliotecarios.get(0).getCliente().getId()));
+        resultados.add(9, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getRndCaso()));
+        resultados.add(10, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : bibliotecarios.get(0).getTipoConsulta());
+        resultados.add(11, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getRndTiempoAtencion()));
+        resultados.add(12, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getDuracionAtencion()));
+        resultados.add(13, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getTiempoFinAtencion()));
+
+        resultados.add(14, bibliotecarios.get(1).getEstado().equals("Libre") ? "Libre" : bibliotecarios.get(1).getEstado());
+        resultados.add(15, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.valueOf(bibliotecarios.get(1).getCliente().getId()));
+        resultados.add(16, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndCaso()));
+        resultados.add(17, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : bibliotecarios.get(1).getTipoConsulta());
+        resultados.add(18, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndTiempoAtencion()));
+        resultados.add(19, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getDuracionAtencion()));
+        resultados.add(20, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getTiempoFinAtencion()));
+
+        //por cada cliente que alla en la biblioteca, se agrega su id,estado,Tllegada,rndDesicion,rndTiempoLectura,TLectura,Tsalida
+        //empezando desde el indice 21 y usando los que corresponda
+        int i = 21;
+        for (Cliente cliente : capacidadTotal) {
+            resultados.add(i, cliente.getId());
+            resultados.add(i + 1, cliente.getEstado());
+            resultados.add(i + 2, String.format("%.2f", cliente.getTiempoEntrada()));
+            resultados.add(i + 3, String.format("%.2f", cliente.getRndDesicion()));
+            resultados.add(i + 4, String.format("%.2f", cliente.getRndTiempoLectura()));
+            resultados.add(i + 5, String.format("%.2f", cliente.getTiempoLectura()));
+            resultados.add(i + 6, cliente.getTiempoSalida() == -1 ? "-" : String.format("%.2f", cliente.getTiempoSalida()));
+
+            i += 7;
         }
+        //imprimir los resultados
+        System.out.println(resultados);
+        return resultados;
+    }
 
     // Calcular próximo evento
     public void calcularProximoEvento() {

@@ -11,6 +11,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Optional;
 
 public class Simulador extends JFrame {
     private JPanel Main;
@@ -40,7 +42,7 @@ public class Simulador extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Inicializar JTextFields con valores predeterminados
-        frecLlegada.setText("5");
+        frecLlegada.setText("4");
         probSocio.setText("0.1");
         probDevolver.setText("0.45");
         probPedir.setText("0.45");
@@ -91,29 +93,29 @@ public class Simulador extends JFrame {
                 "S1_rndCaso", "S1_caso", "S1_rndTiempo", "S1_duracionA",
                 "S1_finAtencion", "S2_estado", "S2_cliente", "S2_rndCaso",
                 "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion",
-                "C1_estado", "C1_TiempoEntrada", "C1_rndDesicion", "C1_rndTiempoLectura","C1_TiempoLectura","C1_TiempoSalida",
-                "C2_estado", "C2_TiempoEntrada", "C2_rndDesicion", "C2_rndTiempoLectura","C2_TiempoLectura","C2_TiempoSalida",
-                "C3_estado", "C3_TiempoEntrada", "C3_rndDesicion", "C3_rndTiempoLectura","C3_TiempoLectura","C3_TiempoSalida",
-                "C4_estado", "C4_TiempoEntrada", "C4_rndDesicion", "C4_rndTiempoLectura","C4_TiempoLectura","C4_TiempoSalida",
-                "C5_estado", "C5_TiempoEntrada", "C5_rndDesicion", "C5_rndTiempoLectura","C5_TiempoLectura","C5_TiempoSalida",
-                "C6_estado", "C6_TiempoEntrada", "C6_rndDesicion", "C6_rndTiempoLectura","C6_TiempoLectura","C6_TiempoSalida",
-                "C7_estado", "C7_TiempoEntrada", "C7_rndDesicion", "C7_rndTiempoLectura","C7_TiempoLectura","C7_TiempoSalida",
-                "C8_estado", "C8_TiempoEntrada", "C8_rndDesicion", "C8_rndTiempoLectura","C8_TiempoLectura","C8_TiempoSalida",
-                "C9_estado", "C9_TiempoEntrada", "C9_rndDesicion", "C9_rndTiempoLectura","C9_TiempoLectura","C9_TiempoSalida",
-                "C10_estado", "C10_TiempoEntrada", "C10_rndDesicion", "C10_rndTiempoLectura","C10_TiempoLectura","C10_TiempoSalida",
-                "C11_estado", "C11_TiempoEntrada", "C11_rndDesicion", "C11_rndTiempoLectura","C11_TiempoLectura","C11_TiempoSalida",
-                "C12_estado", "C12_TiempoEntrada", "C12_rndDesicion", "C12_rndTiempoLectura","C12_TiempoLectura","C12_TiempoSalida",
-                "C13_estado", "C13_TiempoEntrada", "C13_rndDesicion", "C13_rndTiempoLectura","C13_TiempoLectura","C13_TiempoSalida",
-                "C14_estado", "C14_TiempoEntrada", "C14_rndDesicion", "C14_rndTiempoLectura","C14_TiempoLectura","C14_TiempoSalida",
-                "C15_estado", "C15_TiempoEntrada", "C15_rndDesicion", "C15_rndTiempoLectura","C15_TiempoLectura","C15_TiempoSalida",
-                "C16_estado", "C16_TiempoEntrada", "C16_rndDesicion", "C16_rndTiempoLectura","C16_TiempoLectura","C16_TiempoSalida",
-                "C17_estado", "C17_TiempoEntrada", "C17_rndDesicion", "C17_rndTiempoLectura","C17_TiempoLectura","C17_TiempoSalida",
-                "C18_estado", "C18_TiempoEntrada", "C18_rndDesicion", "C18_rndTiempoLectura","C18_TiempoLectura","C18_TiempoSalida",
-                "C19_estado", "C19_TiempoEntrada", "C19_rndDesicion", "C19_rndTiempoLectura","C19_TiempoLectura","C19_TiempoSalida",
-                "C20_estado", "C20_TiempoEntrada", "C20_rndDesicion", "C20_rndTiempoLectura","C20_TiempoLectura","C20_TiempoSalida"
-
-
+                "ID","C1_estado", "C1_TiempoEntrada", "C1_rndDesicion", "C1_rndTiempoLectura","C1_TiempoLectura","C1_TiempoSalida",
+                "ID","C2_estado", "C2_TiempoEntrada", "C2_rndDesicion", "C2_rndTiempoLectura","C2_TiempoLectura","C2_TiempoSalida",
+                "ID","C3_estado", "C3_TiempoEntrada", "C3_rndDesicion", "C3_rndTiempoLectura","C3_TiempoLectura","C3_TiempoSalida",
+                "ID","C4_estado", "C4_TiempoEntrada", "C4_rndDesicion", "C4_rndTiempoLectura","C4_TiempoLectura","C4_TiempoSalida",
+                "ID","C5_estado", "C5_TiempoEntrada", "C5_rndDesicion", "C5_rndTiempoLectura","C5_TiempoLectura","C5_TiempoSalida",
+                "ID","C6_estado", "C6_TiempoEntrada", "C6_rndDesicion", "C6_rndTiempoLectura","C6_TiempoLectura","C6_TiempoSalida",
+                "ID","C7_estado", "C7_TiempoEntrada", "C7_rndDesicion", "C7_rndTiempoLectura","C7_TiempoLectura","C7_TiempoSalida",
+                "ID","C8_estado", "C8_TiempoEntrada", "C8_rndDesicion", "C8_rndTiempoLectura","C8_TiempoLectura","C8_TiempoSalida",
+                "ID","C9_estado", "C9_TiempoEntrada", "C9_rndDesicion", "C9_rndTiempoLectura","C9_TiempoLectura","C9_TiempoSalida",
+                "ID","C10_estado", "C10_TiempoEntrada", "C10_rndDesicion", "C10_rndTiempoLectura","C10_TiempoLectura","C10_TiempoSalida",
+                "ID","C11_estado", "C11_TiempoEntrada", "C11_rndDesicion", "C11_rndTiempoLectura","C11_TiempoLectura","C11_TiempoSalida",
+                "ID","C12_estado", "C12_TiempoEntrada", "C12_rndDesicion", "C12_rndTiempoLectura","C12_TiempoLectura","C12_TiempoSalida",
+                "ID","C13_estado", "C13_TiempoEntrada", "C13_rndDesicion", "C13_rndTiempoLectura","C13_TiempoLectura","C13_TiempoSalida",
+                "ID","C14_estado", "C14_TiempoEntrada", "C14_rndDesicion", "C14_rndTiempoLectura","C14_TiempoLectura","C14_TiempoSalida",
+                "ID","C15_estado", "C15_TiempoEntrada", "C15_rndDesicion", "C15_rndTiempoLectura","C15_TiempoLectura","C15_TiempoSalida",
+                "ID","C16_estado", "C16_TiempoEntrada", "C16_rndDesicion", "C16_rndTiempoLectura","C16_TiempoLectura","C16_TiempoSalida",
+                "ID","C17_estado", "C17_TiempoEntrada", "C17_rndDesicion", "C17_rndTiempoLectura","C17_TiempoLectura","C17_TiempoSalida",
+                "ID","C18_estado", "C18_TiempoEntrada", "C18_rndDesicion", "C18_rndTiempoLectura","C18_TiempoLectura","C18_TiempoSalida",
+                "ID","C19_estado", "C19_TiempoEntrada", "C19_rndDesicion", "C19_rndTiempoLectura","C19_TiempoLectura","C19_TiempoSalida",
+                "ID","C20_estado", "C20_TiempoEntrada", "C20_rndDesicion", "C20_rndTiempoLectura","C20_TiempoLectura","C20_TiempoSalida"
         };
+        //impirmir la longitud del array
+        System.out.println(columnNames.length);
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
         table1.setModel(model);
@@ -206,12 +208,28 @@ public class Simulador extends JFrame {
     }
 
     private void onSimularButtonClick() {
-        // Aquí va la lógica que quieres ejecutar cuando se hace clic en el botón "Simular"
-        System.out.println("Botón 'Simular' clickeado");
-        // Puedes agregar la lógica que necesites aquí, por ejemplo:
-        // - Leer y procesar los datos de los JTextFields
-        // - Realizar cálculos o simulaciones
-        // - Mostrar resultados en la tabla o en otro componente
+        // Crear una simulación con los valores de los JTextField y luego llenar la tabla con la matriz
+        Simulacion simulacion = new Simulacion(
+                Optional.of(Double.parseDouble(frecLlegada.getText())),
+                Optional.of(Double.parseDouble(tiempo.getText())),
+                Optional.of(Integer.parseInt(filas.getText())),
+                Optional.of(List.of(Double.parseDouble(probPedir.getText()),Double.parseDouble(probDevolver.getText()),Double.parseDouble(probSocio.getText()))),
+                Optional.of(List.of(Double.parseDouble(tiempoMin.getText()), Double.parseDouble(tiempoMax.getText()))),
+                Optional.of(Double.parseDouble(probLectura.getText())),
+                Optional.of(Double.parseDouble(promLectura.getText()))
+        );
+
+        // Asumimos que la simulación devuelve una matriz de resultados de tipo List<List<Object>>
+        List<List<Object>> resultados = simulacion.simular();
+
+        // Limpiar la tabla actual
+        DefaultTableModel model = (DefaultTableModel) table1.getModel();
+        model.setRowCount(0);
+
+        // Rellenar la tabla con los nuevos datos
+        for (List<Object> fila : resultados) {
+            model.addRow(fila.toArray());
+        }
     }
 
     public static void main(String[] args) {
