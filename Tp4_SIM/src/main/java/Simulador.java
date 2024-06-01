@@ -1,8 +1,10 @@
 import com.formdev.flatlaf.FlatDarculaLaf;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -89,7 +91,7 @@ public class Simulador extends JFrame {
         // Crear la tabla con el encabezado doble
         String[] columnNames = {
                 "evento", "reloj", "Llegada_rnd1", "tiempo", "proxLlegada",
-                "Cola Atención", "Ocupacion Actual", "S1_estado", "S1_cliente",
+                "Cola Atención", "Ocupacion Actual","llegadasTotales","llegadasFallidas", "S1_estado", "S1_cliente",
                 "S1_rndCaso", "S1_caso", "S1_rndTiempo", "S1_duracionA",
                 "S1_finAtencion", "S2_estado", "S2_cliente", "S2_rndCaso",
                 "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion",
@@ -116,9 +118,58 @@ public class Simulador extends JFrame {
         };
         //impirmir la longitud del array
         System.out.println(columnNames.length);
-        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
-
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Todas las celdas no son editables
+            }
+        };
         table1.setModel(model);
+
+        // Aplicar el renderizador personalizado a las columnas
+        DefaultTableCellRenderer customRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                // Centrando el texto en las celdas
+                setHorizontalAlignment(SwingConstants.CENTER);
+
+                // Aplicar color de fondo basado en el índice de la columna
+                if (column >= 0 && column <= 1) {
+                    c.setBackground(Color.DARK_GRAY);
+                } else if (column >= 2 && column <= 4) {
+                    c.setBackground(new Color(29, 118, 52));
+                } else if (column >= 5 && column <= 8) {
+                    c.setBackground(Color.DARK_GRAY);
+                } else if (column >= 9 && column <= 15) {
+                    c.setBackground(new Color(29, 34, 131));
+                } else if (column >= 16 && column <= 22) {
+                    c.setBackground(new Color(109, 32, 125));
+                } else {
+                    // Alternar colores cada 7 columnas a partir de la columna 21
+                    if ((column - 23) / 7 % 2 == 0) {
+                        c.setBackground(new Color(109, 93, 37));
+                    } else {
+                        c.setBackground(new Color(38, 131, 98));
+                    }
+                }
+
+                return c;
+            }
+        };
+
+        for (int i = 0; i < table1.getColumnCount(); i++) {
+            table1.getColumnModel().getColumn(i).setCellRenderer(customRenderer);
+        }
+
+        //hacer focus en un fila de la tabla cuando elijo una fila
+        table1.setCellSelectionEnabled(true);
+        table1.setRowSelectionAllowed(true);
+        table1.setIntercellSpacing(new Dimension(1, 1));
+        table1.setShowGrid(true);
+        table1.setGridColor(Color.BLACK);
+
         scrollPanel.setViewportView(table1);
         scrollPanel.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         setVisible(true);

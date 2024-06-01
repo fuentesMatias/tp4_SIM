@@ -57,6 +57,14 @@ public class Bibliotecario {
         }
     }
 
+    public void atenderConDevolucion(double reloj) {
+        tipoConsulta = "Devolver";
+        rndTiempoAtencion = Math.random();
+        rndCaso = 0.0;
+        duracionAtencion = 1.5 + (1.0 * rndTiempoAtencion);
+        tiempoFinAtencion = reloj + duracionAtencion;
+    }
+
     public void liberarBibliotecario() {
         estado = "Libre";
         cliente = null;
@@ -70,6 +78,10 @@ public class Bibliotecario {
     public void ocuparBibliotecario(Cliente cliente,double reloj) {
         estado = "Ocupado";
         this.cliente = cliente;
-        calcularTiempoFinAtencion(reloj);
+        if (cliente.getEstado().equals("EsperandoParaDevolver")) {
+            atenderConDevolucion(reloj);
+        }
+        else
+            calcularTiempoFinAtencion(reloj);
     }
 }

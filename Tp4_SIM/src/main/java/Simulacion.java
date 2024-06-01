@@ -16,7 +16,9 @@ public class Simulacion {
     // Variables
     //matriz de resultados
     private List<List<Object>> matriz = new ArrayList<>();
+    private static final int CAPACIDAD_TOTAL = 20;
     private List<Cliente> capacidadTotal;
+    private int clientesActuales = 0; // Seguimiento del número actual de clientes en la biblioteca
     private List<Bibliotecario> bibliotecarios;
     private Cola cola;
     private String evento;
@@ -68,8 +70,35 @@ public class Simulacion {
         llegadasTotales = 0;
         llegadasFallidas = 0;
         tiemposDePermanencia = new ArrayList<>();
+        //imprimir el vector capacidadTotal
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            capacidadTotal.add(null);
+        }
+
+
     }
 
+    // Método para agregar un cliente a la biblioteca
+    private void agregarCliente(Cliente cliente) {
+        // Buscar el primer hueco vacío en la capacidadTotal
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            if (capacidadTotal.get(i) == null) {
+                capacidadTotal.set(i, cliente);
+                clientesActuales++;
+                break;
+            }
+        }
+    }
+    // Método para eliminar un cliente de la biblioteca
+    private void eliminarCliente(int idCliente) {
+        for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
+            if (capacidadTotal.get(i) != null && capacidadTotal.get(i).getId() == idCliente) {
+                capacidadTotal.set(i, null); // Marcar el lugar como vacío
+                clientesActuales--;
+                break;
+            }
+        }
+    }
     private static List<Double> getDefaultProbabilidadesCasos() {
         List<Double> defaultProbabilidades = new ArrayList<>();
         defaultProbabilidades.add(0.45);
@@ -118,7 +147,7 @@ public class Simulacion {
     private List<Object> imprimirResultados() {
         //crea una lista de Objetos para guardar los resultados de longitud fija
 
-        List<Object> resultados = new ArrayList<>(121);
+        List<Object> resultados = new ArrayList<>(123);
         //agregar todos estos datos:
         //"evento", "reloj", "Llegada_rnd1", "tiempo", "proxLlegada",
         //                "Cola Atención", "Ocupacion Actual", "S1_estado", "S1_cliente",
@@ -132,28 +161,40 @@ public class Simulacion {
         resultados.add(3, evento.equals("llegadaCliente") ? String.format("%.2f", cola.getTiempoEntre()) : "-");
         resultados.add(4, String.format("%.2f", cola.getProximaLlegada()));
         resultados.add(5, cola.getColaAtencion().size());
-        resultados.add(6, capacidadTotal.size());
+        resultados.add(6, clientesActuales);
 
-        resultados.add(7, bibliotecarios.get(0).getEstado().equals("Libre") ? "Libre" : bibliotecarios.get(0).getEstado());
-        resultados.add(8, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.valueOf(bibliotecarios.get(0).getCliente().getId()));
-        resultados.add(9, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getRndCaso()));
-        resultados.add(10, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : bibliotecarios.get(0).getTipoConsulta());
-        resultados.add(11, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getRndTiempoAtencion()));
-        resultados.add(12, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getDuracionAtencion()));
-        resultados.add(13, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getTiempoFinAtencion()));
+        resultados.add(7,llegadasTotales);
+        resultados.add(8,llegadasFallidas);
 
-        resultados.add(14, bibliotecarios.get(1).getEstado().equals("Libre") ? "Libre" : bibliotecarios.get(1).getEstado());
-        resultados.add(15, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.valueOf(bibliotecarios.get(1).getCliente().getId()));
-        resultados.add(16, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndCaso()));
-        resultados.add(17, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : bibliotecarios.get(1).getTipoConsulta());
-        resultados.add(18, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndTiempoAtencion()));
-        resultados.add(19, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getDuracionAtencion()));
-        resultados.add(20, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getTiempoFinAtencion()));
+        resultados.add(9, bibliotecarios.get(0).getEstado().equals("Libre") ? "Libre" : bibliotecarios.get(0).getEstado());
+        resultados.add(10, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.valueOf(bibliotecarios.get(0).getCliente().getId()));
+        resultados.add(11, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getRndCaso()));
+        resultados.add(12, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : bibliotecarios.get(0).getTipoConsulta());
+        resultados.add(13, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getRndTiempoAtencion()));
+        resultados.add(14, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getDuracionAtencion()));
+        resultados.add(15, bibliotecarios.get(0).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(0).getTiempoFinAtencion()));
 
-        //por cada cliente que alla en la biblioteca, se agrega su id,estado,Tllegada,rndDesicion,rndTiempoLectura,TLectura,Tsalida
-        //empezando desde el indice 21 y usando los que corresponda
-        int i = 21;
+        resultados.add(16, bibliotecarios.get(1).getEstado().equals("Libre") ? "Libre" : bibliotecarios.get(1).getEstado());
+        resultados.add(17, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.valueOf(bibliotecarios.get(1).getCliente().getId()));
+        resultados.add(18, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndCaso()));
+        resultados.add(19, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : bibliotecarios.get(1).getTipoConsulta());
+        resultados.add(20, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndTiempoAtencion()));
+        resultados.add(21, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getDuracionAtencion()));
+        resultados.add(22, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getTiempoFinAtencion()));
+
+        int i = 23;
         for (Cliente cliente : capacidadTotal) {
+            if (cliente == null) {
+                resultados.add(i, "-");
+                resultados.add(i + 1, "-");
+                resultados.add(i + 2, "-");
+                resultados.add(i + 3, "-");
+                resultados.add(i + 4, "-");
+                resultados.add(i + 5, "-");
+                resultados.add(i + 6, "-");
+                i += 7;
+                continue;
+            }
             resultados.add(i, cliente.getId());
             resultados.add(i + 1, cliente.getEstado());
             resultados.add(i + 2, String.format("%.2f", cliente.getTiempoEntrada()));
@@ -161,10 +202,9 @@ public class Simulacion {
             resultados.add(i + 4, String.format("%.2f", cliente.getRndTiempoLectura()));
             resultados.add(i + 5, String.format("%.2f", cliente.getTiempoLectura()));
             resultados.add(i + 6, cliente.getTiempoSalida() == -1 ? "-" : String.format("%.2f", cliente.getTiempoSalida()));
-
             i += 7;
         }
-        //imprimir los resultados
+        //imprimir resultados
         System.out.println(resultados);
         return resultados;
     }
@@ -183,23 +223,24 @@ public class Simulacion {
         }
         //para cada cliente que este en estado leyendo se fija si es el proximo en terminar
         for (Cliente cliente : capacidadTotal) {
+            if  (cliente == null) {
+                continue;
+            }
             if (cliente.getTiempoSalida() < minimo && Objects.equals(cliente.getEstado(), "leyendo") && cliente.getTiempoSalida() != -1) {
                 minimo = cliente.getTiempoSalida();
                 evento = "finLectura";
             }
         }
-
         reloj = minimo;
-
     }
 
     // Eventos
     public void llegadaCliente() {
-        if (capacidadTotal.size() < 20) {
+        if (clientesActuales < 20) {
             //si la capacidad es menor a 20 se agrega un cliente
             Cliente cliente = new Cliente(reloj);
             //se agrega el cliente a la biblioteca, dsp se decide a donde va
-            capacidadTotal.add(cliente);
+            agregarCliente(cliente);
             llegadasTotales++;
 
             // Si hay bibliotecarios libres se atiende al cliente en ese bibliotecario, sino lo pone en la cola
@@ -233,6 +274,7 @@ public class Simulacion {
             }
             else{
                 //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
+                cliente.setTiempoSalida(reloj);
                 tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
                 capacidadTotal.remove(cliente);
                 bibliotecarios.get(0).liberarBibliotecario();
@@ -242,8 +284,8 @@ public class Simulacion {
             //si no pidio un libro, se libera al bibliotecario, y se saca al cliente de la biblioteca y se guarda el tiempo de permanencia
             cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
             tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
-            capacidadTotal.remove(cliente);//Saco al cliente de la biblioteca
-            bibliotecarios.get(0).liberarBibliotecario();
+            eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
+            bibliotecarios.get(0).liberarBibliotecario(); //Libero al bibliotecario
         }
 
         //Ahora si hay gente en la cola, se atiende al proximo
@@ -277,8 +319,10 @@ public class Simulacion {
             //si no pidio un libro, se libera al bibliotecario, y se saca al cliente de la biblioteca y se guarda el tiempo de permanencia
             cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
             tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
-            capacidadTotal.remove(cliente);//Saco al cliente de la biblioteca
+            eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
             bibliotecarios.get(1).liberarBibliotecario();
+            // Imprimir el id y tiempo de permanencia
+            System.out.println("Cliente " + cliente.getId() + " permanecio " + cliente.calcularTiempoPermancencia() + " minutos");
         }
 
         //Ahora si hay gente en la cola, se atiende al proximo
@@ -294,15 +338,25 @@ public class Simulacion {
         //Busca al cliente que termino de leer por el tiempo del reloj actual
         Cliente cliente = null;
         for (Cliente c : capacidadTotal) {
+            if (c == null) {
+                continue;
+            }
             if (c.getTiempoSalida() == reloj && Objects.equals(c.getEstado(), "leyendo")) {
                 cliente = c;
                 break;
             }
         }
-        // Si termino de leer lo guarda el tiempo de permanencia y lo saca de la biblioteca
-        if (cliente != null) {
-            tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
-            capacidadTotal.remove(cliente);
+        // Si termino de leer, verifica si hay un bibliotecario libre para atenderlo, sino lo pone en la cola
+        cliente.setEstado("EsperandoParaDevolver");
+        if (bibliotecarios.get(0).getEstado().equals("Libre")) {
+            bibliotecarios.get(0).ocuparBibliotecario(cliente, reloj); // setea y calcula el tiempo de fin de atencion
+            cliente.setEstado("Atendido");
+        } else if (bibliotecarios.get(1).getEstado().equals("Libre")) {
+            bibliotecarios.get(1).ocuparBibliotecario(cliente, reloj); // setea y calcula el tiempo de fin de atencion
+            cliente.setEstado("Atendido");
+        } else {
+            cola.getColaAtencion().add(cliente);
+            cliente.setEstado("EsperandoParaDevolver");
         }
     }
 }

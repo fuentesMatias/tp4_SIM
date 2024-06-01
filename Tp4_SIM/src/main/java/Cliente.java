@@ -4,7 +4,7 @@ import lombok.Data;
 public class Cliente {
     private static int ultimoId = 0; // Atributo estático para el último ID usado
     private int id; // ID único para cada cliente
-    private String estado = ""; // Esperando, Leyendo, Atendido
+    private String estado = ""; // Esperando, Leyendo, Atendido,EsperandoParaDevolver
 
     private static double probabilidadPermanecerLeyendo = 0.4;
     private static double tiempoPromedioLectura = 30.0;
@@ -12,6 +12,7 @@ public class Cliente {
     private double rndDesicion;
     private double rndTiempoLectura;
     private double tiempoLectura;
+    private double tiempoFinLectura;
     private double tiempoEntrada;
     private double tiempoSalida;
 
@@ -31,6 +32,7 @@ public class Cliente {
     public static void setTiempoPromedioLectura(Double tiempo) {
         tiempoPromedioLectura = tiempo;
     }
+
     public boolean calcularTiempoSalidaSiPidio(double reloj) {
         rndDesicion = Math.random();
         if (rndDesicion < probabilidadPermanecerLeyendo){ // decidir si permanece leyendo
