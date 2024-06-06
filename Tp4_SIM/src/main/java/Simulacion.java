@@ -6,6 +6,7 @@ import java.util.*;
 public class Simulacion {
     // Parametros
     private double tiempoSimulacion;
+    private double mostrarDesde;
     private Integer iteracionesAMostrar;
     private double frecuenciaLlegada;
     private List<Double> probabilidadesCasos;
@@ -31,6 +32,7 @@ public class Simulacion {
     // Constructor con valores por defecto
     public Simulacion(Optional<Double> frecuenciaLlegada,
                       Optional<Double> tiempoSimulacion,
+                      Optional<Double> mostrarDesde,
                       Optional<Integer> iteracionesAMostrar,
                       Optional<List<Double>> probabilidadesCasos,
                       Optional<List<Double>> tiemposAtencionConsulta,
@@ -41,6 +43,7 @@ public class Simulacion {
 
         this.iteracionesAMostrar = iteracionesAMostrar.orElse(100);
         this.tiempoSimulacion = tiempoSimulacion.orElse(100.0);
+        this.mostrarDesde = mostrarDesde.orElse(0.0);
 
         this.probabilidadesCasos = probabilidadesCasos.orElse(getDefaultProbabilidadesCasos());
         Bibliotecario.setProbabilidadesCasos(probabilidadesCasos.orElse(getDefaultProbabilidadesCasos()));
@@ -53,6 +56,8 @@ public class Simulacion {
 
         this.tiempoPromedioLectura = tiempoPromedioLectura.orElse(30.0);
         Cliente.setTiempoPromedioLectura(tiempoPromedioLectura.orElse(30.0));
+
+
         inicializarVariables();
     }
 
@@ -122,6 +127,7 @@ public class Simulacion {
         matriz.add(imprimirResultados());
         calcularProximoEvento();
         nroIteracion++;
+        int mostradas = 0;
         while (reloj < tiempoSimulacion && nroIteracion < 100000) {
             switch (evento) {
                 case "llegadaCliente":
@@ -137,10 +143,20 @@ public class Simulacion {
                     finLectura();
                     break;
             }
-            matriz.add(imprimirResultados());
+            //imprimir los resultados si el reloj es mayor o igual a mostrarDesde y crear un contador para imprimir solo las iteracionesAMostrar y mostrar la ultima
+            if (reloj >= mostrarDesde && mostradas < iteracionesAMostrar || reloj >= tiempoSimulacion){
+                mostradas++;
+                matriz.add(imprimirResultados());
+            }
             calcularProximoEvento();
             nroIteracion++;
+            //mostrar los id de los clientes que quedaron en la biblioteca en una sola linea
+            System.out.println("Clientes en la biblioteca: ");
+            capacidadTotal.stream().filter(Objects::nonNull).forEach(cliente -> System.out.print(cliente.getId() + " "));
+            System.out.println();
         }
+
+
         return matriz;
     }
 
@@ -201,11 +217,9 @@ public class Simulacion {
             resultados.add(i + 3, String.format("%.2f", cliente.getRndDesicion()));
             resultados.add(i + 4, String.format("%.2f", cliente.getRndTiempoLectura()));
             resultados.add(i + 5, String.format("%.2f", cliente.getTiempoLectura()));
-            resultados.add(i + 6, cliente.getTiempoSalida() == -1 ? "-" : String.format("%.2f", cliente.getTiempoSalida()));
+            resultados.add(i + 6, cliente.getTiempoFinLectura() == -1 ? "-" : String.format("%.2f", cliente.getTiempoFinLectura()));
             i += 7;
         }
-        //imprimir resultados
-        System.out.println(resultados);
         return resultados;
     }
 
@@ -226,8 +240,8 @@ public class Simulacion {
             if  (cliente == null) {
                 continue;
             }
-            if (cliente.getTiempoSalida() < minimo && Objects.equals(cliente.getEstado(), "leyendo") && cliente.getTiempoSalida() != -1) {
-                minimo = cliente.getTiempoSalida();
+            if (cliente.getTiempoFinLectura() < minimo && Objects.equals(cliente.getEstado(), "leyendo") && cliente.getTiempoFinLectura() != -1) {
+                minimo = cliente.getTiempoFinLectura();
                 evento = "finLectura";
             }
         }
@@ -267,17 +281,17 @@ public class Simulacion {
         //cuando termina de antender a un cliente, primero se verifica si ese cliente pidio un libro
         if(Objects.equals(bibliotecarios.get(0).getTipoConsulta(), "Pedir")){
             //si pidio un libro, se calcula si se queda o se va
-            if (cliente.calcularTiempoSalidaSiPidio(reloj)){ // En este metodo se setea el tiempo ya sea si se va o se queda
+            if (cliente.calcularSiHayLectura(reloj)){ // En este metodo se setea el tiempo ya sea si se va o se queda
                 //si se queda, se cambia el estado a leyendo, y se libera al bibliotecario
                 cliente.setEstado("leyendo");
                 bibliotecarios.get(0).liberarBibliotecario();
             }
             else{
                 //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
-                cliente.setTiempoSalida(reloj);
-                tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
-                capacidadTotal.remove(cliente);
-                bibliotecarios.get(0).liberarBibliotecario();
+                cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
+                tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+                eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
+                bibliotecarios.get(0).liberarBibliotecario(); //Libero al bibliotecario
             }
         }
         else{
@@ -303,16 +317,17 @@ public class Simulacion {
         //cuando termina de antender a un cliente, primero se verifica si ese cliente pidio un libro
         if(Objects.equals(bibliotecarios.get(1).getTipoConsulta(), "Pedir")){
             //si pidio un libro, se calcula si se queda o se va
-            if (cliente.calcularTiempoSalidaSiPidio(reloj)){ // En este metodo se setea el tiempo ya sea si se va o se queda
+            if (cliente.calcularSiHayLectura(reloj)){ // En este metodo se setea el tiempo de fin Lectura
                 //si se queda, se cambia el estado a leyendo, y se libera al bibliotecario
                 cliente.setEstado("leyendo");
                 bibliotecarios.get(1).liberarBibliotecario();
             }
             else{
                 //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
-                tiemposDePermanencia.add(cliente.calcularTiempoPermancencia());
-                capacidadTotal.remove(cliente);
-                bibliotecarios.get(1).liberarBibliotecario();
+                cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
+                tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+                eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
+                bibliotecarios.get(1).liberarBibliotecario(); //Libero al bibliotecario
             }
         }
         else{
@@ -320,9 +335,7 @@ public class Simulacion {
             cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
             tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
             eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
-            bibliotecarios.get(1).liberarBibliotecario();
-            // Imprimir el id y tiempo de permanencia
-            System.out.println("Cliente " + cliente.getId() + " permanecio " + cliente.calcularTiempoPermancencia() + " minutos");
+            bibliotecarios.get(1).liberarBibliotecario(); //Libero al bibliotecario
         }
 
         //Ahora si hay gente en la cola, se atiende al proximo
@@ -341,7 +354,7 @@ public class Simulacion {
             if (c == null) {
                 continue;
             }
-            if (c.getTiempoSalida() == reloj && Objects.equals(c.getEstado(), "leyendo")) {
+            if (c.getTiempoFinLectura() == reloj && Objects.equals(c.getEstado(), "leyendo")) {
                 cliente = c;
                 break;
             }

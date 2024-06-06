@@ -1,7 +1,6 @@
 import com.formdev.flatlaf.FlatDarculaLaf;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -28,9 +27,12 @@ public class Simulador extends JFrame {
     private JTextField probLectura;
     private JTable table1;
     private JTextField promLectura;
-    private JTextField filas;
+    private JTextField tiempoDesde;
     private JTextField tiempo;
     private JScrollPane scrollPanel;
+    private JTextField cantFilas;
+    private JTextField textPromedio;
+    private JTextField porcentajeFallido;
 
     public Simulador() {
         try {
@@ -52,8 +54,9 @@ public class Simulador extends JFrame {
         tiempoMax.setText("5");
         probLectura.setText("0.4");
         promLectura.setText("30");
-        filas.setText("10");
+        tiempoDesde.setText("0");
         tiempo.setText("60");
+        cantFilas.setText("100");
 
         // Agregar DocumentListener a todos los JTextField
         addDocumentListener(probSocio);
@@ -64,8 +67,9 @@ public class Simulador extends JFrame {
         addDocumentListener(tiempoMax);
         addDocumentListener(probLectura);
         addDocumentListener(promLectura);
-        addDocumentListener(filas);
+        addDocumentListener(tiempoDesde);
         addDocumentListener(tiempo);
+        addDocumentListener(cantFilas);
 
         // Aplicar filtro de entrada a los JTextFields
         applyNumberFilter(probSocio);
@@ -76,8 +80,9 @@ public class Simulador extends JFrame {
         applyNumberFilter(tiempoMax);
         applyNumberFilter(probLectura);
         applyNumberFilter(promLectura);
-        applyNumberFilter(filas);
+        applyNumberFilter(tiempoDesde);
         applyNumberFilter(tiempo);
+        applyNumberFilter(cantFilas);
 
         // Configurar el tamaño del botón y agregar ActionListener
         simularButton.setPreferredSize(new Dimension(200, 100));
@@ -229,8 +234,9 @@ public class Simulador extends JFrame {
             double probLecturaValue = Double.parseDouble(probLectura.getText());
             double promLecturaValue = Double.parseDouble(promLectura.getText());
             double frecLlegadaValue = Double.parseDouble(frecLlegada.getText());
-            int filasValue = Integer.parseInt(filas.getText());
-            int tiempoValue = Integer.parseInt(tiempo.getText());
+            double tiempoDesdeValue = Double.parseDouble(tiempoDesde.getText());
+            double tiempoValue = Double.parseDouble(tiempo.getText());
+            int cantFilasValue = Integer.parseInt(cantFilas.getText());
 
             if (probSocioValue + probDevolverValue + probPedirValue != 1) {
                 simularButton.setEnabled(false);
@@ -247,7 +253,12 @@ public class Simulador extends JFrame {
                 return;
             }
 
-            if (filasValue <= 0 || tiempoValue <= 0) {
+            if (tiempoDesdeValue < 0 || tiempoValue <= 0 || cantFilasValue <= 0) {
+                simularButton.setEnabled(false);
+                return;
+            }
+
+            if (tiempoDesdeValue > tiempoValue) { // Permitir 0 como valor válido para tiempoDesde
                 simularButton.setEnabled(false);
                 return;
             }
@@ -263,7 +274,8 @@ public class Simulador extends JFrame {
         Simulacion simulacion = new Simulacion(
                 Optional.of(Double.parseDouble(frecLlegada.getText())),
                 Optional.of(Double.parseDouble(tiempo.getText())),
-                Optional.of(Integer.parseInt(filas.getText())),
+                Optional.of(Double.parseDouble(tiempoDesde.getText())),
+                Optional.of(Integer.parseInt(cantFilas.getText())),
                 Optional.of(List.of(Double.parseDouble(probPedir.getText()),Double.parseDouble(probDevolver.getText()),Double.parseDouble(probSocio.getText()))),
                 Optional.of(List.of(Double.parseDouble(tiempoMin.getText()), Double.parseDouble(tiempoMax.getText()))),
                 Optional.of(Double.parseDouble(probLectura.getText())),
@@ -281,6 +293,16 @@ public class Simulador extends JFrame {
         for (List<Object> fila : resultados) {
             model.addRow(fila.toArray());
         }
+        //calcular el porcentaje de llegadas fallidas
+        int llegadasTotales = simulacion.getLlegadasTotales();
+        int llegadasFallidas = simulacion.getLlegadasFallidas();
+        double porcentajeLlegadasFallidas = (double) llegadasFallidas / llegadasTotales * 100;
+        porcentajeFallido.setText(String.format("%.2f", porcentajeLlegadasFallidas) + "%");
+
+        //calcular el tiempo de permanencia promedio
+        double tiempoPromedioPermanencia = simulacion.getTiemposDePermanencia().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        textPromedio.setText(String.format("%.2f", tiempoPromedioPermanencia));
+
     }
 
     public static void main(String[] args) {
