@@ -121,8 +121,7 @@ public class Simulador extends JFrame {
                 "ID","C19_estado", "C19_TiempoEntrada", "C19_rndDesicion", "C19_rndTiempoLectura","C19_TiempoLectura","C19_TiempoFinLectura",
                 "ID","C20_estado", "C20_TiempoEntrada", "C20_rndDesicion", "C20_rndTiempoLectura","C20_TiempoLectura","C20_TiempoFinLectura"
         };
-        //impirmir la longitud del array
-        System.out.println(columnNames.length);
+
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -159,7 +158,12 @@ public class Simulador extends JFrame {
                         c.setBackground(new Color(38, 131, 98));
                     }
                 }
-
+                //pintar de rojo las letras de la fila seleccionada
+                if (isSelected) {
+                    c.setForeground(Color.RED);
+                } else {
+                    c.setForeground(Color.WHITE);
+                }
                 return c;
             }
         };
@@ -168,9 +172,6 @@ public class Simulador extends JFrame {
             table1.getColumnModel().getColumn(i).setCellRenderer(customRenderer);
         }
 
-        //hacer focus en un fila de la tabla cuando elijo una fila
-        table1.setCellSelectionEnabled(true);
-        table1.setRowSelectionAllowed(true);
         table1.setIntercellSpacing(new Dimension(1, 1));
         table1.setShowGrid(true);
         table1.setGridColor(Color.BLACK);
