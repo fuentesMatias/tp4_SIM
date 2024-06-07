@@ -96,7 +96,7 @@ public class Simulador extends JFrame {
         // Crear la tabla con el encabezado doble
         String[] columnNames = {
                 "evento", "reloj", "Llegada_rnd1", "tiempo", "proxLlegada",
-                "Cola Atención", "Ocupacion Actual","llegadasTotales","llegadasFallidas", "S1_estado", "S1_cliente",
+                "Cola Atención", "Ocupacion Actual","llegadasTotales","llegadasFallidas","Tiempos Permanencia", "S1_estado", "S1_cliente",
                 "S1_rndCaso", "S1_caso", "S1_rndTiempo", "S1_duracionA",
                 "S1_finAtencion", "S2_estado", "S2_cliente", "S2_rndCaso",
                 "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion",
@@ -145,15 +145,15 @@ public class Simulador extends JFrame {
                     c.setBackground(Color.DARK_GRAY);
                 } else if (column >= 2 && column <= 4) {
                     c.setBackground(new Color(29, 118, 52));
-                } else if (column >= 5 && column <= 8) {
+                } else if (column >= 5 && column <= 9) {
                     c.setBackground(Color.DARK_GRAY);
-                } else if (column >= 9 && column <= 15) {
+                } else if (column >= 10 && column <= 16) {
                     c.setBackground(new Color(29, 34, 131));
-                } else if (column >= 16 && column <= 22) {
+                } else if (column >= 17 && column <= 23) {
                     c.setBackground(new Color(109, 32, 125));
                 } else {
                     // Alternar colores cada 7 columnas a partir de la columna 21
-                    if ((column - 23) / 7 % 2 == 0) {
+                    if ((column - 24) / 7 % 2 == 0) {
                         c.setBackground(new Color(109, 93, 37));
                     } else {
                         c.setBackground(new Color(38, 131, 98));
