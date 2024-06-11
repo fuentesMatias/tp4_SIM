@@ -6,6 +6,7 @@ public class Cliente {
     private int id; // ID único para cada cliente
     private String estado = ""; // Esperando, Leyendo, Atendido,EsperandoParaDevolver
 
+
     private static double probabilidadPermanecerLeyendo = 0.4;
     private static double tiempoPromedioLectura = 30.0;
 
@@ -28,6 +29,11 @@ public class Cliente {
     public static void setProbabilidadPermanecerLeyendo(Double prob) {
         probabilidadPermanecerLeyendo = prob;
 
+    }
+
+    // resetear el id
+    public static void resetId() {
+        ultimoId = 0;
     }
 
     public static void setTiempoPromedioLectura(Double tiempo) {

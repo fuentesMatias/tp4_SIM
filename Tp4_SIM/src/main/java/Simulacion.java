@@ -123,6 +123,7 @@ public class Simulacion {
 
     // Inicializar
     public List<List<Object>> simular() {
+        Cliente.resetId();
 
         cola.setProximaLlegada(1.6);
         matriz.add(imprimirResultados());
@@ -147,17 +148,16 @@ public class Simulacion {
                     break;
             }
             //imprimir los resultados si el reloj es mayor o igual a mostrarDesde y crear un contador para imprimir solo las iteracionesAMostrar y mostrar la ultima
-            if (reloj >= mostrarDesde && mostradas < iteracionesAMostrar || reloj >= tiempoSimulacion){
+            if (reloj >= mostrarDesde && mostradas < iteracionesAMostrar || reloj >= tiempoSimulacion) {
                 mostradas++;
                 matriz.add(imprimirResultados());
             }
+
             calcularProximoEvento();
             nroIteracion++;
-            //mostrar los id de los clientes que quedaron en la biblioteca en una sola linea
-            System.out.println("Clientes en la biblioteca: ");
-            capacidadTotal.stream().filter(Objects::nonNull).forEach(cliente -> System.out.print(cliente.getId() + " "));
-            System.out.println();
         }
+        //mostrar la ultima fila
+        matriz.add(imprimirResultados());
 
 
         return matriz;
