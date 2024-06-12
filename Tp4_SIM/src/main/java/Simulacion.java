@@ -124,7 +124,6 @@ public class Simulacion {
     // Inicializar
     public List<List<Object>> simular() {
         Cliente.resetId();
-
         cola.setProximaLlegada(1.6);
         matriz.add(imprimirResultados());
         calcularProximoEvento();
