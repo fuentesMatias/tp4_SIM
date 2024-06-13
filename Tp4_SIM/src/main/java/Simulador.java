@@ -99,7 +99,7 @@ public class Simulador extends JFrame {
                 "Cola Atención", "Ocupacion Actual","llegadasTotales","llegadasFallidas","Tiempos Permanencia", "S1_estado", "S1_cliente",
                 "S1_rndCaso", "S1_caso", "S1_rndTiempo", "S1_duracionA",
                 "S1_finAtencion", "S2_estado", "S2_cliente", "S2_rndCaso",
-                "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion",
+                "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion", "Acum. Tiempos Permanencia", "Contador clientes at. finalizada",
                 "ID","C1_estado", "C1_TiempoEntrada", "C1_rndDesicion", "C1_rndTiempoLectura","C1_TiempoLectura","C1_TiempoFinLectura",
                 "ID","C2_estado", "C2_TiempoEntrada", "C2_rndDesicion", "C2_rndTiempoLectura","C2_TiempoLectura","C2_TiempoFinLectura",
                 "ID","C3_estado", "C3_TiempoEntrada", "C3_rndDesicion", "C3_rndTiempoLectura","C3_TiempoLectura","C3_TiempoFinLectura",
@@ -148,11 +148,11 @@ public class Simulador extends JFrame {
                     c.setBackground(Color.DARK_GRAY);
                 } else if (column >= 10 && column <= 16) {
                     c.setBackground(new Color(29, 34, 131));
-                } else if (column >= 17 && column <= 23) {
+                } else if (column >= 17 && column <= 25) {
                     c.setBackground(new Color(109, 32, 125));
                 } else {
                     // Alternar colores cada 7 columnas a partir de la columna 21
-                    if ((column - 24) / 7 % 2 == 0) {
+                    if ((column - 26) / 7 % 2 == 0) {
                         c.setBackground(new Color(109, 93, 37));
                     } else {
                         c.setBackground(new Color(38, 131, 98));

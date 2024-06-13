@@ -29,6 +29,9 @@ public class Simulacion {
     private int llegadasFallidas;
     private List<Double> tiemposDePermanencia;
     boolean imprimirTiempoPermanencia = false;
+    private double acumuladorTiemposPermanencia;
+    private int contadorClientesAtendidos;
+
 
     // Constructor con valores por defecto
     public Simulacion(Optional<Double> frecuenciaLlegada,
@@ -76,6 +79,8 @@ public class Simulacion {
         llegadasTotales = 0;
         llegadasFallidas = 0;
         tiemposDePermanencia = new ArrayList<>();
+        acumuladorTiemposPermanencia = 0;
+        contadorClientesAtendidos = 0;
         //imprimir el vector capacidadTotal
         for (int i = 0; i < CAPACIDAD_TOTAL; i++) {
             capacidadTotal.add(null);
@@ -118,6 +123,12 @@ public class Simulacion {
         defaultTiempos.add(2.0);
         defaultTiempos.add(5.0);
         return defaultTiempos;
+    }
+
+    private void sumarTiempoPermanencia (double tiempo){
+        acumuladorTiemposPermanencia += tiempo;
+        contadorClientesAtendidos += 1;
+        return;
     }
 
 
@@ -165,7 +176,7 @@ public class Simulacion {
     private List<Object> imprimirResultados() {
         //crea una lista de Objetos para guardar los resultados de longitud fija
 
-        List<Object> resultados = new ArrayList<>(124);
+        List<Object> resultados = new ArrayList<>(126);
         //agregar todos estos datos:
         //"evento", "reloj", "Llegada_rnd1", "tiempo", "proxLlegada",
         //                "Cola Atención", "Ocupacion Actual", "S1_estado", "S1_cliente",
@@ -201,8 +212,11 @@ public class Simulacion {
         resultados.add(21, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getRndTiempoAtencion()));
         resultados.add(22, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getDuracionAtencion()));
         resultados.add(23, bibliotecarios.get(1).getEstado().equals("Libre") ? "-" : String.format("%.2f", bibliotecarios.get(1).getTiempoFinAtencion()));
+        resultados.add(24, String.format("%.2f",acumuladorTiemposPermanencia));
+        resultados.add(25, contadorClientesAtendidos);
 
-        int i = 24;
+
+        int i = 26;
         for (Cliente cliente : capacidadTotal) {
             if (cliente == null) {
                 resultados.add(i, "-");
@@ -294,6 +308,7 @@ public class Simulacion {
                 //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
                 cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
                 tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+                sumarTiempoPermanencia(cliente.calcularTiempoPermancencia());
                 imprimirTiempoPermanencia = true;
                 eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
                 bibliotecarios.get(0).liberarBibliotecario(); //Libero al bibliotecario
@@ -303,6 +318,7 @@ public class Simulacion {
             //si no pidio un libro, se libera al bibliotecario, y se saca al cliente de la biblioteca y se guarda el tiempo de permanencia
             cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
             tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+            sumarTiempoPermanencia(cliente.calcularTiempoPermancencia());
             imprimirTiempoPermanencia = true;
             eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
             bibliotecarios.get(0).liberarBibliotecario(); //Libero al bibliotecario
@@ -332,6 +348,7 @@ public class Simulacion {
                 //si se va, se libera al bibliotecario y se elimina al cliente de la biblioteca y se guarda el tiempo de permanencia
                 cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
                 tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+                sumarTiempoPermanencia(cliente.calcularTiempoPermancencia());
                 imprimirTiempoPermanencia = true;
                 eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
                 bibliotecarios.get(1).liberarBibliotecario(); //Libero al bibliotecario
@@ -341,6 +358,7 @@ public class Simulacion {
             //si no pidio un libro, se libera al bibliotecario, y se saca al cliente de la biblioteca y se guarda el tiempo de permanencia
             cliente.setTiempoSalida(reloj); //Seteo el tiempo de salida en el actual
             tiemposDePermanencia.add(cliente.calcularTiempoPermancencia()); //Guardo el tiempo de permanencia
+            sumarTiempoPermanencia(cliente.calcularTiempoPermancencia());
             imprimirTiempoPermanencia = true;
             eliminarCliente(cliente.getId()); //Saco al cliente de la biblioteca
             bibliotecarios.get(1).liberarBibliotecario(); //Libero al bibliotecario

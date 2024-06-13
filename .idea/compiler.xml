@@ -10,8 +10,5 @@
         <module name="Tp4_SIM" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Tp4_SIM" target="17" />
-    </bytecodeTargetLevel>
   </component>
 </project>
