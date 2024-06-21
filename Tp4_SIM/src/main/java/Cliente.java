@@ -40,6 +40,8 @@ public class Cliente {
         tiempoPromedioLectura = tiempo;
     }
 
+
+
     public boolean calcularSiHayLectura(double reloj) {
         rndDesicion = Math.random();
         if (rndDesicion < probabilidadPermanecerLeyendo){ // decidir si permanece leyendo

@@ -21,9 +21,9 @@ public class Simulador extends JFrame {
     private JTextField probSocio;
     private JTextField probDevolver;
     private JTextField probPedir;
-    private JTextField tiempoMin;
+    private JTextField MinM;
     private JTextField frecLlegada;
-    private JTextField tiempoMax;
+    private JTextField MaxM;
     private JTextField probLectura;
     private JTable table1;
     private JTextField promLectura;
@@ -33,6 +33,9 @@ public class Simulador extends JFrame {
     private JTextField cantFilas;
     private JTextField textPromedio;
     private JTextField porcentajeFallido;
+    private JTextField h;
+    private JTextField p1;
+    private JTextField p2;
 
     public Simulador() {
         try {
@@ -50,39 +53,46 @@ public class Simulador extends JFrame {
         probSocio.setText("0.1");
         probDevolver.setText("0.45");
         probPedir.setText("0.45");
-        tiempoMin.setText("2");
-        tiempoMax.setText("5");
+        MinM.setText("6");
+        MaxM.setText("21");
         probLectura.setText("0.4");
         promLectura.setText("30");
         tiempoDesde.setText("0");
         tiempo.setText("60");
         cantFilas.setText("100");
+        h.setText("0.1");
+        p1.setText("0.01");
+        p2.setText("3.0");
 
         // Agregar DocumentListener a todos los JTextField
         addDocumentListener(probSocio);
         addDocumentListener(probDevolver);
         addDocumentListener(probPedir);
-        addDocumentListener(tiempoMin);
+        addDocumentListener(MinM);
         addDocumentListener(frecLlegada);
-        addDocumentListener(tiempoMax);
+        addDocumentListener(MaxM);
         addDocumentListener(probLectura);
         addDocumentListener(promLectura);
         addDocumentListener(tiempoDesde);
         addDocumentListener(tiempo);
         addDocumentListener(cantFilas);
+        addDocumentListener(h);
+        addDocumentListener(p1);
+        addDocumentListener(p2);
 
         // Aplicar filtro de entrada a los JTextFields
         applyNumberFilter(probSocio);
         applyNumberFilter(probDevolver);
         applyNumberFilter(probPedir);
-        applyNumberFilter(tiempoMin);
+        applyNumberFilter(MinM);
         applyNumberFilter(frecLlegada);
-        applyNumberFilter(tiempoMax);
+        applyNumberFilter(MaxM);
         applyNumberFilter(probLectura);
         applyNumberFilter(promLectura);
         applyNumberFilter(tiempoDesde);
         applyNumberFilter(tiempo);
         applyNumberFilter(cantFilas);
+        applyNumberFilter(h);
 
         // Configurar el tamaño del botón y agregar ActionListener
         simularButton.setPreferredSize(new Dimension(200, 100));
@@ -97,9 +107,9 @@ public class Simulador extends JFrame {
         String[] columnNames = {
                 "evento", "reloj", "Llegada_rnd1", "tiempo", "proxLlegada",
                 "Cola Atención", "Ocupacion Actual","llegadasTotales","llegadasFallidas","Tiempos Permanencia", "S1_estado", "S1_cliente",
-                "S1_rndCaso", "S1_caso", "S1_rndTiempo", "S1_duracionA",
+                "S1_rndCaso", "S1_caso","S1_rndM","S1_M", "S1_rndTiempo", "S1_duracionA",
                 "S1_finAtencion", "S2_estado", "S2_cliente", "S2_rndCaso",
-                "S2_caso", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion", "Acum. Tiempos Permanencia", "Contador clientes at. finalizada",
+                "S2_caso","S2_rndM","S2_M", "S2_rndTiempo", "S2_duracionA", "S2_finAtencion", "Acum. Tiempos Permanencia", "Contador clientes at. finalizada",
                 "ID","C1_estado", "C1_TiempoEntrada", "C1_rndDesicion", "C1_rndTiempoLectura","C1_TiempoLectura","C1_TiempoFinLectura",
                 "ID","C2_estado", "C2_TiempoEntrada", "C2_rndDesicion", "C2_rndTiempoLectura","C2_TiempoLectura","C2_TiempoFinLectura",
                 "ID","C3_estado", "C3_TiempoEntrada", "C3_rndDesicion", "C3_rndTiempoLectura","C3_TiempoLectura","C3_TiempoFinLectura",
@@ -146,13 +156,13 @@ public class Simulador extends JFrame {
                     c.setBackground(new Color(29, 118, 52));
                 } else if (column >= 5 && column <= 9) {
                     c.setBackground(Color.DARK_GRAY);
-                } else if (column >= 10 && column <= 16) {
+                } else if (column >= 10 && column <= 18) {
                     c.setBackground(new Color(29, 34, 131));
-                } else if (column >= 17 && column <= 25) {
+                } else if (column >= 19 && column <= 27) {
                     c.setBackground(new Color(109, 32, 125));
                 } else {
                     // Alternar colores cada 7 columnas a partir de la columna 21
-                    if ((column - 26) / 7 % 2 == 0) {
+                    if ((column - 28) / 7 % 2 == 0) {
                         c.setBackground(new Color(109, 93, 37));
                     } else {
                         c.setBackground(new Color(38, 131, 98));
@@ -230,15 +240,23 @@ public class Simulador extends JFrame {
             double probSocioValue = Double.parseDouble(probSocio.getText());
             double probDevolverValue = Double.parseDouble(probDevolver.getText());
             double probPedirValue = Double.parseDouble(probPedir.getText());
-            double tiempoMinValue = Double.parseDouble(tiempoMin.getText());
-            double tiempoMaxValue = Double.parseDouble(tiempoMax.getText());
+            double tiempoMinValue = Double.parseDouble(MinM.getText());
+            double tiempoMaxValue = Double.parseDouble(MaxM.getText());
             double probLecturaValue = Double.parseDouble(probLectura.getText());
             double promLecturaValue = Double.parseDouble(promLectura.getText());
             double frecLlegadaValue = Double.parseDouble(frecLlegada.getText());
             double tiempoDesdeValue = Double.parseDouble(tiempoDesde.getText());
             double tiempoValue = Double.parseDouble(tiempo.getText());
             int cantFilasValue = Integer.parseInt(cantFilas.getText());
+            double hValue = Double.parseDouble(h.getText());
+            double p1Value = Double.parseDouble(p1.getText());
+            double p2Value = Double.parseDouble(p2.getText());
 
+
+            if (hValue <= 0 ) {
+                simularButton.setEnabled(false);
+                return;
+            }
             if (probSocioValue + probDevolverValue + probPedirValue != 1) {
                 simularButton.setEnabled(false);
                 return;
@@ -271,6 +289,17 @@ public class Simulador extends JFrame {
     }
 
     private void onSimularButtonClick() {
+        // crea un rungekutta con los valores de los JTextField y luego lo integra
+
+        // OBTIENE LOS PARAMETROS DE LA SIMULACION
+        double alpha = Double.parseDouble(p1.getText());
+        double beta = Double.parseDouble(p2.getText());
+        double H = Double.parseDouble(h.getText());
+        double M_max = Double.parseDouble(MaxM.getText());
+        RungeKuttaIntegration rkIntegration = new RungeKuttaIntegration(alpha, beta, H, M_max);
+
+
+
         // Crear una simulación con los valores de los JTextField y luego llenar la tabla con la matriz
         Simulacion simulacion = new Simulacion(
                 Optional.of(Double.parseDouble(frecLlegada.getText())),
@@ -278,9 +307,11 @@ public class Simulador extends JFrame {
                 Optional.of(Double.parseDouble(tiempoDesde.getText())),
                 Optional.of(Integer.parseInt(cantFilas.getText())),
                 Optional.of(List.of(Double.parseDouble(probPedir.getText()),Double.parseDouble(probDevolver.getText()),Double.parseDouble(probSocio.getText()))),
-                Optional.of(List.of(Double.parseDouble(tiempoMin.getText()), Double.parseDouble(tiempoMax.getText()))),
+                Optional.of(List.of(Double.parseDouble(MinM.getText()), Double.parseDouble(MaxM.getText()))),
                 Optional.of(Double.parseDouble(probLectura.getText())),
-                Optional.of(Double.parseDouble(promLectura.getText()))
+                Optional.of(Double.parseDouble(promLectura.getText())),
+                rkIntegration,
+                Optional.of(List.of(6.0,21.0))
         );
 
         // Asumimos que la simulación devuelve una matriz de resultados de tipo List<List<Object>>
@@ -304,6 +335,10 @@ public class Simulador extends JFrame {
         double tiempoPromedioPermanencia = simulacion.getTiemposDePermanencia().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
         textPromedio.setText(String.format("%.2f", tiempoPromedioPermanencia));
 
+
+        // Mostrar una nueva ventana con el resultado de la integración
+        Integracion integracionWindow = new Integracion(rkIntegration.getResults());
+        integracionWindow.setVisible(true); // Mostrar la ventana integracionWindow
     }
 
     public static void main(String[] args) {

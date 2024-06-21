@@ -1,23 +1,31 @@
 import lombok.Data;
+import lombok.Setter;
 
 import java.util.List;
 
 @Data
 public class Bibliotecario {
     // Parametros
+    @Setter
     private static List<Double> tiemposAtencionConsulta;
+    @Setter
     private static List<Double> probabilidadesCasos;
+    @Setter
+    private static List<Double> limitesM; // uniforme entra A y B
+    private RungeKuttaIntegration rungeKuttaIntegration;
 
     // atributos
     private String estado; // Libre, Ocupado
     private Cliente cliente;
     private String tipoConsulta; // pedir, devolver, socio
     private double rndCaso;
+    private double rndM;
+    private double M;
     private double rndTiempoAtencion;
     private double duracionAtencion;
     private double tiempoFinAtencion;
 
-    public Bibliotecario() {
+    public Bibliotecario(RungeKuttaIntegration rungeKuttaIntegration) {
         estado = "Libre";
         cliente = null;
         tipoConsulta = "";
@@ -25,14 +33,7 @@ public class Bibliotecario {
         rndTiempoAtencion = 0.0;
         duracionAtencion = 0;
         tiempoFinAtencion = -1;
-    }
-
-    public static void setProbabilidadesCasos(List<Double> doubles) {
-        probabilidadesCasos = doubles;
-    }
-
-    public static void setTiemposAtencionConsulta(List<Double> doubles) {
-        tiemposAtencionConsulta = doubles;
+        this.rungeKuttaIntegration = rungeKuttaIntegration;
     }
 
     public void calcularTiempoFinAtencion(double reloj) {
@@ -51,9 +52,13 @@ public class Bibliotecario {
         }
         else{
             tipoConsulta = "Socio";
-            // duracion es una dist uniforme con min=tiemposAtencionConsulta.get(0) y max=tiemposAtencionConsulta.get(1)
-            duracionAtencion = tiemposAtencionConsulta.get(0) + (tiemposAtencionConsulta.get(1) - tiemposAtencionConsulta.get(0)) * rndTiempoAtencion;
-            tiempoFinAtencion = reloj + duracionAtencion;
+            //tira un rnd para M, que va de uniforme entre A y B de los limites y segun ese M calcula el tiempo de atencion con la tabla de RK
+            rndM = Math.random();
+            M = limitesM.get(0) + rndM * (limitesM.get(1) - limitesM.get(0));
+            duracionAtencion = rungeKuttaIntegration.getResultForM(M);
+            tiempoFinAtencion = reloj + rungeKuttaIntegration.getResultForM(M);
+
+
         }
     }
 
@@ -70,6 +75,8 @@ public class Bibliotecario {
         cliente = null;
         tipoConsulta = "";
         rndCaso = 0.0;
+        rndM = 0.0;
+        M = 0.0;
         rndTiempoAtencion = 0.0;
         duracionAtencion = 0;
         tiempoFinAtencion = -1;
